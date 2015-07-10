@@ -1,0 +1,38 @@
+﻿<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Transitional//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-transitional.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+<meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+<title>推箱子游戏</title>
+<style>
+	*{padding:0;margin:0;}
+	#gameZone{position:absolute; }
+	
+	.bg1 { width:50px; height:50px; background:#666; float:left;}
+	.bg2 { width:50px;height:50px;float:left;background:url(images/wall.png) no-repeat;}
+	.bg3 { width:50px;height:50px;float:left;background:red}
+	.bg4 { width:50px;height:50px;float:left;background:blue}
+	
+	.box{ width:50px;height:50px;background:url(images/box.png) no-repeat;position:absolute;}
+	.person{ width:50px;height:50px;background:url(images/person.png) no-repeat;position:absolute;}
+	
+	.score{ width:100px;height:40px;background:blue;position:absolute;top:0; right:0}
+</style>
+<script type="text/javascript" src="jquery-2.0.3.js"></script>
+<script type="text/javascript" src="Game.js"></script>
+<script type="text/javascript">
+	$(function(){
+		var game=new Game();
+		game.init($("#gameZone"));
+		
+	});
+	
+</script>
+</head>
+<body>
+<div id="gameZone">
+
+</div>
+
+
+</body>
+</html>
