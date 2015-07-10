@@ -42,7 +42,7 @@ var Game={
 		
 		/*some constants*/
 		this.snakeSize='10';	//小方格的像素
-		this.zoneSize=30*30;	//画布大小
+		this.zoneSize=50*50;	//画布大小
 		this.direction=39; 	//初始方向
 		this.score=0;		//得分
 
@@ -70,7 +70,6 @@ var Game={
 		this.bindKey();
 		
 	},
-	
 	
 	drawBg:function(){
 	
@@ -102,7 +101,6 @@ var Game={
 		},this));
 		
 	},
-	
 	
 	bindKey:function(){
 	
@@ -147,7 +145,6 @@ var Game={
 		},this));
 	},
 	
-	
 	snakeMove:function(opt){
 	
 		var moveX=opt.x||0;
@@ -158,18 +155,14 @@ var Game={
 		}
 		
 		this.timer=setInterval($.proxy(function(){
-		
 			//移动的时  是将后面的一个div的坐标设置成前面的一个坐标
-			var last=this.snake.length-1;
-			
 			$.each(this.snake,$.proxy(function(i,item){
-				var newPos;
 				
-				if(i==last){  //处理头部的移动
+				if(i==this.snake.length-1){  //处理头部的移动
 				
 					this.snake[i]={x:this.snake[i].x+moveX,y:this.snake[i].y+moveY};
 
-					newPos=this.snake[i].y*Math.sqrt(this.zoneSize)+this.snake[i].x;
+					var newPos=this.snake[i].y*Math.sqrt(this.zoneSize)+this.snake[i].x;
 					
 					//到达了边界 
 					if(this.isOnBorder(newPos)){
@@ -198,49 +191,21 @@ var Game={
 				
 			},this));
 			
-			if(this.isOver()){
+			if(this.isEatSelf()){
 				if(--this.score<0){
-					var that=this;
-					
-					//游戏结束
-					clearInterval(this.timer);
-					this.zone.append('<div class="gameover">游戏结束</div>');
-					
-					var oldBorder=this.zone.css('border');
-					
-					that.zone.css('border','1px solid red');
-					$('.score').css('font-weight','bold');
-					$('.score').css('font-size','200%');
-					
-					var oldColor=$('.gameover').css('background');
-					
-					$('.gameover').mouseover(function(){
-						$(this).text('点击开始');
-						$(this).css('background','green');
-						that.zone.css('border',oldBorder);
-					});
-					
-					$('.gameover').mouseout(function(){
-						$(this).text('游戏结束');
-						$(this).css('background',oldColor);
-						that.zone.css('border','1px solid red');
-						
-					});
-					
-					$('.gameover').click(function(){
-						that.restart();
-					});
+					this.showGameover();
 					return;
-				};
+				}
 				
 				this.showScore(this.score);
 			}
+			
 			this.drawSnake(this.snake);
 			//吃食物
 			if(this.collisionCheck($('.head'),$('.food'))){
 				this.eatFood($('.food'));
 			}
-
+			
 		},this),100);
 
 	},
@@ -255,7 +220,38 @@ var Game={
 		$('.score').remove();
 		
 		this.init(this.zone);
+	},
 	
+	showGameover:function(){
+		//游戏结束
+		clearInterval(this.timer);
+		this.zone.append('<div class="gameover">游戏结束</div>');
+		
+		var oldBorder=this.zone.css('border');
+		
+		this.zone.css('border','1px solid red');
+		$('.score').css('font-weight','bold');
+		$('.score').css('font-size','200%');
+		
+		var oldColor=$('.gameover').css('background');
+		
+		var that=this;
+		$('.gameover').mouseover(function(){
+			$(this).text('点击开始');
+			$(this).css('background','green');
+			that.zone.css('border',oldBorder);
+		});
+		
+		$('.gameover').mouseout(function(){
+			$(this).text('游戏结束');
+			$(this).css('background',oldColor);
+			that.zone.css('border','1px solid red');
+			
+		});
+		
+		$('.gameover').click(function(){
+			that.restart();
+		});
 	},
 	
 	eatFood:function(food){
@@ -274,9 +270,7 @@ var Game={
 	},
 	
 	createFood:function(){
-		var startTime=new Date().getTime(),
-			endTime,
-			x,y;
+		var	x,y;
 		
 		//找到正确的xy值
 		for(;;){
@@ -298,17 +292,9 @@ var Game={
 				}
 			}
 			
-			endTime=new Date().getTime();
-		
-			if(endTime-startTime>500){ //找食物的时间超过了500ms
-				alert('');
-				break;
-			}
-			
 			if(isXYok){
 				break;
 			}
-
 		}
 		
 		//找到后 添加食物
@@ -321,8 +307,6 @@ var Game={
 		food.css('left',x*this.snakeSize);
 		
 		this.zone.append(food);
-		
-		console.log('生成食物用时'+(new Date().getTime()-startTime)+'ms');
 	},
 	
 	//碰撞检测
@@ -347,7 +331,7 @@ var Game={
 	
 	//判断游戏是否结束
 	//条件为头是否碰到了身体其它部分
-	isOver:function(){
+	isEatSelf:function(){
 					
 		//不能吃着自己 
 		for(var i=0;i<$('.snake').length;i++){
@@ -365,10 +349,11 @@ var Game={
 	//边界检测方法  true表示在边界上  false不在边界上
 	isOnBorder:function(i){
 		return (i<Math.sqrt(this.zoneSize)||
-			(i>=this.zoneSize-Math.sqrt(this.zoneSize))||
-			(i%Math.sqrt(this.zoneSize)==0)||
-			(i%Math.sqrt(this.zoneSize)==Math.sqrt(this.zoneSize)-1));
+			i>=this.zoneSize-Math.sqrt(this.zoneSize)||
+			i%Math.sqrt(this.zoneSize)==0||
+			i%Math.sqrt(this.zoneSize)==Math.sqrt(this.zoneSize)-1);
 	}
+	
 }
 	
 </script>
