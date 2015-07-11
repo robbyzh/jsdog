@@ -42,9 +42,9 @@ var Game={
 		
 		/*some constants*/
 		this.snakeSize='10';	//小方格的像素
-		this.zoneSize=50*50;	//画布大小
+		this.zoneSize=35*35;	//画布大小
 		this.direction=39; 	//初始方向
-		this.score=0;		//得分
+		this.score=10;		//初始显示的分数
 
 		
 		this.drawBg();  	//绘制背景 
@@ -59,8 +59,7 @@ var Game={
 			{x:14,y:7},
 			{x:15,y:7},
 			{x:16,y:7},
-			{x:17,y:7},
-			{x:18,y:7}
+			{x:17,y:7}
 		];
 
 		this.drawSnake(this.snake);
@@ -139,9 +138,7 @@ var Game={
 							this.snakeMove({y:1});
 						}
 					break;
-			
 				}
-	
 		},this));
 	},
 	
@@ -167,20 +164,25 @@ var Game={
 					//到达了边界 
 					if(this.isOnBorder(newPos)){
 						
+						//穿墙而过，得分减1
 						if(this.snake[i].x<0){
 							this.snake[i].x=Math.sqrt(this.zoneSize)-1;
+							this.showScore(--this.score);
 						}
 						
 						if(this.snake[i].x>Math.sqrt(this.zoneSize)-1){
 							this.snake[i].x=0;
+							this.showScore(--this.score);
 						}
 					
 						if(this.snake[i].y<0){
 							this.snake[i].y=Math.sqrt(this.zoneSize)-1;
+							this.showScore(--this.score);
 						}
 						
 						if(this.snake[i].y>Math.sqrt(this.zoneSize)-1){
 							this.snake[i].y=0;
+							this.showScore(--this.score);
 						}
 					
 					}
@@ -191,16 +193,18 @@ var Game={
 				
 			},this));
 			
-			if(this.isEatSelf()){
-				if(--this.score<0){
-					this.showGameover();
-					return;
-				}
+			if(this.isEatSelf()||this.score<=0){
 				
+				this.showGameover();
 				this.showScore(this.score);
+				return;
+				
 			}
 			
-			this.drawSnake(this.snake);
+			//drawSnake 最好是在eatFood之前调用
+			//这样在eat之后，下一次draw的时候保证snake已经移动了一次，eat之后身子的加长就不会出现问题
+			this.drawSnake(this.snake);		
+			
 			//吃食物
 			if(this.collisionCheck($('.head'),$('.food'))){
 				this.eatFood($('.food'));
@@ -255,13 +259,12 @@ var Game={
 	},
 	
 	eatFood:function(food){
-		food.remove();
-				
-		this.snake.splice(0,0,{x:food.data('x'),y:food.data('y')});
-		
+		//只要在eat之前draw,这里加到数组中的坐标就无关紧要了
+		this.snake.splice(0,0,{x:0,y:0});
 		//得分加1
 		this.showScore(++this.score);
 		
+		food.remove();
 		this.createFood();
 	},
 	
@@ -343,7 +346,6 @@ var Game={
 			}
 		}
 		return false;
-	
 	},
 	
 	//边界检测方法  true表示在边界上  false不在边界上
